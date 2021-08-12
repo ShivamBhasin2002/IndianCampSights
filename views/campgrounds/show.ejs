@@ -1,14 +1,54 @@
 <% layout('./layouts/boilerplate') %>
     <h1>
-        <%= campground._id%>
+        <%= campground.title%>
     </h1>
+    <h2>
+        <%= campground.location%>
+    </h2>
+    <h6>
+        Price:
+        <%=campground.price%>
+    </h6>
+    <img class="w-100" src="<%=campground.image%>" alt="Image not found">
+    <p>
+        <%=campground.desc%>
+    </p>
+    <a class="btn btn-warning" href="/campgrounds/<%=campground._id%>/edit">edit</a>
+    <form class="d-inline" action="/campgrounds/<%=campground._id%>?_method=delete" method="post">
+        <button class="btn btn-danger">Delete</button>
+    </form>
+
+    <!-- <% layout('./layouts/boilerplate') %>
     <h1>
         <%= campground.title%>
     </h1>
-    <h1>
+    <h2>
         <%= campground.location%>
-    </h1>
+    </h2>
+    <h6>Price:
+        <%=campground.price%>
+    </h6>
+    <img class="w-100" src="<%=campground.image%>" alt="Image not found">
+    <p>
+        <%=campground.desc%>
+    </p>
     <h4><a href="/campgrounds/<%=campground._id%>/edit">edit</a></h4>
     <form action="/campgrounds/<%=campground._id%>?_method=delete" method="post">
         <button>Delete</button>
     </form>
+    <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="..." alt="Card image cap">
+        <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+        </ul>
+        <div class="card-body">
+            <a href="#" class="card-link">Card link</a>
+            <a href="#" class="card-link">Another link</a>
+        </div>
+    </div> -->

@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 });
 
 //Show All
-app.get('/campgrounds', async (req, res) => {
+app.get('/campgrounds', async(req, res) => {
     const campgrounds = await Campground.find({});
     res.render("campgrounds/index", { campgrounds: campgrounds });
 });
@@ -41,32 +41,32 @@ app.get('/campgrounds/new', (req, res) => {
 });
 
 //Show one
-app.get('/campgrounds/:id', async (req, res) => {
+app.get('/campgrounds/:id', async(req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render("campgrounds/show", { campground: campground });
 });
 
 //Create New
-app.post('/campgrounds', async (req, res) => {
+app.post('/campgrounds', async(req, res) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
 });
 
 //Edit Form
-app.get('/campgrounds/:id/edit', async (req, res) => {
+app.get('/campgrounds/:id/edit', async(req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', { campground: campground });
 });
 
 //Edit Campground
-app.put('/campgrounds/:id', async (req, res) => {
-    const campground = await Campground.findByIdAndUpdate(req.params.id, { ...req.body.campground });
+app.put('/campgrounds/:id', async(req, res) => {
+    const campground = await Campground.findByIdAndUpdate(req.params.id, {...req.body.campground });
     res.redirect(`/campgrounds/${campground._id}`);
 });
 
 //Delete Campground
-app.delete('/campgrounds/:id', async (req, res) => {
+app.delete('/campgrounds/:id', async(req, res) => {
     await Campground.findByIdAndDelete(req.params.id);
     res.redirect('/campgrounds/');
 });
