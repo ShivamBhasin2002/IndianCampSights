@@ -3,6 +3,8 @@ const path = require('path');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
+const catchAsync = require("./utils/CatchAsync.js");
+const expressError = require("./utils/ExpressError.js");
 const Campground = require('./models/campground');
 
 mongoose.connect('mongodb://localhost:27017/indian-camp', { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false });
@@ -29,10 +31,10 @@ app.get('/', (req, res) => {
 });
 
 //Show All
-app.get('/campgrounds', async(req, res) => {
+app.get('/campgrounds', catchAsync(async(req, res) => {
     const campgrounds = await Campground.find({});
     res.render("campgrounds/index", { campgrounds: campgrounds });
-});
+}));
 
 
 //New Form
@@ -41,37 +43,41 @@ app.get('/campgrounds/new', (req, res) => {
 });
 
 //Show one
-app.get('/campgrounds/:id', async(req, res) => {
+app.get('/campgrounds/:id', catchAsync(async(req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render("campgrounds/show", { campground: campground });
-});
+}));
 
 //Create New
-app.post('/campgrounds', async(req, res) => {
+app.post('/campgrounds', catchAsync(async(req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
-});
+}));
 
 //Edit Form
-app.get('/campgrounds/:id/edit', async(req, res) => {
+app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', { campground: campground });
-});
+}));
 
 //Edit Campground
-app.put('/campgrounds/:id', async(req, res) => {
+app.put('/campgrounds/:id', catchAsync(async(req, res) => {
     const campground = await Campground.findByIdAndUpdate(req.params.id, {...req.body.campground });
     res.redirect(`/campgrounds/${campground._id}`);
-});
+}));
 
 //Delete Campground
-app.delete('/campgrounds/:id', async(req, res) => {
+app.delete('/campgrounds/:id', catchAsync(async(req, res) => {
     await Campground.findByIdAndDelete(req.params.id);
     res.redirect('/campgrounds/');
+}));
+
+app.use((err, req, res, next) => {
+    res.send("Error");
 });
 
 app.listen(process.env.PORT || 3000, process.env.IP, () => {
     console.log(process.env.PORT || 3000);
     console.log("Server Started");
-})
+});
