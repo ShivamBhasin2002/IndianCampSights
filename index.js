@@ -6,6 +6,8 @@ const ejsMate = require('ejs-mate');
 const catchAsync = require("./utils/CatchAsync.js");
 const expressError = require("./utils/ExpressError.js");
 const Campground = require('./models/campground');
+const { campgroundSchema } = require('./schemas.js');
+const ExpressError = require('./utils/ExpressError.js');
 
 mongoose.connect('mongodb://localhost:27017/indian-camp', { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false });
 
@@ -24,6 +26,15 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+
+const validateCampground = (req, res, next) => {
+    const { error } = campgroundSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(', ');
+        throw new ExpressError(msg, 400);
+    } else
+        next();
+}
 
 //Index
 app.get('/', (req, res) => {
@@ -49,7 +60,7 @@ app.get('/campgrounds/:id', catchAsync(async(req, res) => {
 }));
 
 //Create New
-app.post('/campgrounds', catchAsync(async(req, res, next) => {
+app.post('/campgrounds', validateCampground, catchAsync(async(req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -62,7 +73,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
 }));
 
 //Edit Campground
-app.put('/campgrounds/:id', catchAsync(async(req, res) => {
+app.put('/campgrounds/:id', validateCampground, catchAsync(async(req, res) => {
     const campground = await Campground.findByIdAndUpdate(req.params.id, {...req.body.campground });
     res.redirect(`/campgrounds/${campground._id}`);
 }));
@@ -73,8 +84,15 @@ app.delete('/campgrounds/:id', catchAsync(async(req, res) => {
     res.redirect('/campgrounds/');
 }));
 
+app.all('*', (req, res, next) => {
+    next(new expressError('Page Not Found', 404));
+});
+
 app.use((err, req, res, next) => {
-    res.send("Error");
+    const { statusCode = 500 } = err;
+    if (!err.message)
+        err.message = 'Something Went Wrong';
+    res.status(statusCode).render('error', { err });
 });
 
 app.listen(process.env.PORT || 3000, process.env.IP, () => {
