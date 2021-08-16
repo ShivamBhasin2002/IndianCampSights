@@ -3,12 +3,19 @@ const path = require('path');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError.js');
 
 const campgrounds = require('./routes/campground.js');
 const reviews = require('./routes/review.js');
 
-mongoose.connect('mongodb://localhost:27017/indian-camp', { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false });
+mongoose.connect('mongodb://localhost:27017/indian-camp', {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+});
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Connection error:"));
@@ -18,13 +25,26 @@ db.once("open", () => {
 
 const app = express();
 
-app.use(express.static('public'));
 app.engine('ejs', ejsMate);
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, 'views'));
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(flash());
+
+const sessionConfig = {
+    secret: 'IDK wtf this is',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() * 604800000,
+        maxAge: 604800000
+    }
+}
+app.use(session(sessionConfig));
 
 //Index
 app.get('/', (req, res) => {
