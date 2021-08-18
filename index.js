@@ -5,10 +5,15 @@ const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
 const session = require('express-session');
 const flash = require('connect-flash');
+const passport = require('passport');;
+const localStratergy = require('passport-local');
+const User = require('./models/user.js');
+
 const ExpressError = require('./utils/ExpressError.js');
 
-const campgrounds = require('./routes/campground.js');
-const reviews = require('./routes/review.js');
+const campgroundRoutes = require('./routes/campground.js');
+const reviewRoutes = require('./routes/review.js');
+const userRoutes = require('./routes/user.js')
 
 mongoose.connect('mongodb://localhost:27017/indian-camp', {
     useNewUrlParser: true,
@@ -46,7 +51,14 @@ const sessionConfig = {
 }
 app.use(session(sessionConfig));
 
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStratergy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.use((req, res, next) => {
+    res.locals.currUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
@@ -57,11 +69,14 @@ app.get('/', (req, res) => {
     res.render("home");
 });
 
+//User Routes
+app.use('/users', userRoutes);
+
 //Campground Routes
-app.use('/campgrounds', campgrounds);
+app.use('/campgrounds', campgroundRoutes);
 
 //Review Routes
-app.use('/campgrounds/:id/review', reviews);
+app.use('/campgrounds/:id/review', reviewRoutes);
 
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found', 404));
