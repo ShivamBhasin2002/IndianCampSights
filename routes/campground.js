@@ -19,7 +19,12 @@ router.get('/new', isLoggedIn, (req, res) => {
 
 //Show one
 router.get('/:id', catchAsync(async (req, res) => {
-    const campground = await (await Campground.findById(req.params.id).populate('reviews').populate('author'));
+    const campground = await (await Campground.findById(req.params.id).populate({
+        path: 'reviews',
+        populate: {
+            path: 'author'
+        }
+    }).populate('author'));
     res.render("campgrounds/show", { campground: campground });
 }));
 
